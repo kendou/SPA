@@ -1,6 +1,6 @@
 /*
- * spa.shell.js
- * Shell module for SPA
+ * spa.util.js
+ * General Javascript utilities
 */
 
 /*jslint	browser : true, continue : true
@@ -11,6 +11,51 @@
 */
 /*global $, spa */
 
+spa.util = (function (){
+	var makeError, setConfigMap;
+	
+	//Begin public constrctor /makeError/
+	//Purpose: a convenience wrapper to create an error object
+	makeError = function (name_text, msg_text, data){
+		var error = new Error();
+		error.name = name_text;
+		error.message = msg_text;
+		if(data){error.data = data;}
+		
+		return error;
+	};
+	//End public constructor /makeError/
+	
+	//Begin public method /setConfigMap/
+	//Purpose: Common code to set configs in feature modules
+	setConfigMap = function (arg_map){
+		var
+			input_map = arg_map.input_map,
+			settable_map = arg_map.settable_map,
+			config_map = arg_map.config_map,
+			key_name, error;
+			
+		for(key_name in input_map){
+			if(input_map.hasOwnProperty(key_name)){
+				if(settable_map.hasOwnProperty(key_name)){
+					config_map[key_name] = input_map[key_name];
+				}
+				else{
+					error = makeError('Bad Input',
+						'Setting config key |' + key_name + '| is not supported'
+					);
+					throw error;
+				}
+			}
+		}
+	};
+	//End public method /setConfigMap/
+	
+	return {
+		makeError : makeError,
+		setConfigMap : setConfigMap
+	};
+}());
 spa.shell = (function () {
 	//-------------------BEGIN MODULE SCOPE VARIABLES ---------------
 	var configMap = {
@@ -243,10 +288,6 @@ spa.shell = (function () {
 		$.uriAnchor.configModule({
 			schema_map : configMap.anchor_shcema_map
 		});		
-		
-		//configure and initialize feature modules
-		spa.chat.configModule( {} );
-		spa.chat.initModule(jqueryMap.$chat);
 		
 		//Handle URI anchor change events.
 		$(window)
