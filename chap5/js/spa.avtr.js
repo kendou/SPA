@@ -1,6 +1,6 @@
 /**
- * spa.model.js
- * Model module for SPA
+ * spa.avtr.js
+ * Avatar feature module
 */
 
 /*jslint    browser : true, continue: true,
@@ -11,6 +11,4 @@
 */
 /*global $, spa */
 
-spa.model = (function(){ return {}; 
-
-} () );
+spa.avtr = (function () {return {};} ());
