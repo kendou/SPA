@@ -13,14 +13,40 @@
 
 spa.model = (function(){ 
   'use strict';
-  var configMap = {anon_id : 'a0'},
-  stateMap = {
-    anon_user : null,
-    people_cid_map : {},
-    people_db : TAFFY()
-  },
-  isFakeData = true,
-  personProto, makePerson, people, initModule;
+  var 
+    configMap = {anon_id : 'a0'},
+    stateMap = {
+      anon_user : null,
+      cid_serial : 0,
+      people_cid_map : {},
+      people_db : TAFFY(),
+      user : null
+    },
+    isFakeData = true,
+    personProto, makeCid, clearPeopleDb, completeLogin,
+    makePerson, removePerson, people, initModule;
+  
+  //The people object API
+  // *get_user() - return the current user person object
+  // *get_db() - return the TaffyDB database of all the person objects
+  // *get_by_cid(<client_id>) - return a person object with provided unique id.
+  // *login ( <user_name> ) - login as the user with the provided user name
+  // *logout() - revert the current user object to anonymous
+  //
+  //jQuery global custom events published by the object include :
+  // *spa-login - This is published when a user login process completes.
+  // *spa-logout This published when a logout completes.
+  //
+  // Each person is represented by a person object.
+  // Person objects provide the following methods:
+  // *get_is_user() - return true if object is the current user;
+  // *get_is_anon() - return true if object is anonymous
+  //
+  // The attributes for a person object include:
+  // *cid - string client id.
+  // *id - the unique id.
+  // *name - the string name of the user.
+  // *css_map - a map of attributes used for avatar presentation
   
   personProto = {
     get_is_user : function (){
@@ -31,6 +57,32 @@ spa.model = (function(){
     }
   };
 
+  makeCid = function(){
+    return 'c' + String( stateMap.cid_serial ++);  
+  };
+  
+  clearPeopleDb = function (){
+    var user = stateMp.user;
+    stateMap.people_db = TAFFY();
+    stateMap.people_cid_map = {};
+    if(user) {
+      stateMap.people_db.insert(user);
+      stateMap.people_cid_map[user.cid] = user;
+    }
+  };
+  
+  completeLogin = function (user_list){
+    var user_map = user_list[0];
+    delete stateMap.people_cid_map[user_map.cid];
+    stateMap.user.cid = user_map._id;
+    stateMap.user.id = user_map._id;
+    stateMap.user.css_map = user_map.css_map;
+    stateMap.people_cid_map[user_map._id] = stateMap.user;
+    
+    //When we add chat, we should join here
+    $.gevent.publish('spa-login', [stateMap.user]);
+  };
+  
   makePerson = function (person_map){
     var person,
       cid = person_map.cid,
@@ -54,10 +106,70 @@ spa.model = (function(){
       return person;
   };
   
-  people = {
-    get_db : function () { return stateMap.people_db;},
-    get_cid_map : function () { return stateMap.people_ci_map;}
+  removePerson = function(person) {
+    if(!person){return false;}
+    //can't remove anonymous person
+    if(person.id === configMap.anon_id){
+      return false;
+    }
+    
+    stateMap.people_db({cid : person.cid}).remove();
+    if(person.cid){
+      delete stateMap.people_cid_map[person.cid];
+    }
+    return true;
   };
+  
+
+  people = (function() {
+    
+    var get_by_cid, get_db, get_user, login, logout;
+    
+    get_by_cid = function (cid) {
+      return stateMap.people_cid_map[cid];
+    };
+    
+    get_db = function (){ return stateMap.people_db;};
+    
+    get_user = function (){ return stateMap.user;};
+    
+    login = function(name){
+      var sio = isFakeData ? spa.fake.mockSio : spa.data.getSio();
+      
+      stateMap.user = makePerson({
+        cid : makeCid(),
+        css_map : {top : 25, left:25, 'background-color':'#8f8'},
+        name : name
+      });
+      
+      sio.on('userupdate', completeLogin);
+      
+      sio.emit('adduser', {
+        cid : stateMap.user.cid,
+        css_map : stateMap.user.css_map,
+        name : stateMap.user.name
+      });
+    };
+    
+    logout = function(){
+      var is_removed, user = stateMap.user;
+      //when we add chat, we should leave the chatroom here
+      
+      is_removed = removePerson(user);
+      stateMap.user = stateMap.anon_user;
+      
+      $.gevent.publish('spa-logout', [user]);
+      return is_removed;
+    };
+
+    return {
+      get_by_cid: get_by_cid,
+      get_db: get_db,
+      get_user: get_user,
+      login: login,
+      logout: logout
+    };
+  }());
   
   initModule = function (){
     var i, people_list, person_map;
@@ -83,10 +195,10 @@ spa.model = (function(){
       }
     }
   };
-  
+
   return {
     initModule : initModule,
     people : people
-  }
+  };
 } () );
 
