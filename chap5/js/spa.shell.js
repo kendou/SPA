@@ -12,6 +12,7 @@
 /*global $, spa */
 
 spa.shell = (function () {
+  'use strict';
 	//-------------------BEGIN MODULE SCOPE VARIABLES ---------------
 	var configMap = {
 			anchor_schema_map : {
@@ -20,9 +21,11 @@ spa.shell = (function () {
 			main_html : String()
 				+'<div id="spa">\
 				<div class="spa-shell-head">\
-					<div class="spa-shell-head-logo"></div>\
+					<div class="spa-shell-head-logo">\
+					  <h1>SPA</h1>\
+					  <p>javascript end to end</p>\
+					</div>\
 					<div class="spa-shell-head-acct"></div>\
-					<div class="spa-shell-head-search"></div>\
 				</div>\
 				<div class="spa-shell-main">\
 					<div class="spa-shell-main-nav"></div>\
@@ -39,8 +42,9 @@ spa.shell = (function () {
 			resize_idto : undefined
 		},
 		jqueryMap = {},
-		copyAnchorMap, setJqueryMap, changeAnchorPart, 
-		onHashchange, onResize, setChatAnchor, initModule;
+		copyAnchorMap, setJqueryMap, changeAnchorPart, onHashchange, 
+		onTapAcct, onLogin, onLogout,
+		onResize, setChatAnchor, initModule;
 	//------------------END MODULE SCOPE VARIABLES ------------------
 	
 	//------------------BEGIN UTILITY VARIABLES ----------------
@@ -53,8 +57,11 @@ spa.shell = (function () {
 	//------------------BEGIN DOM METHODS ----------------------
 	setJqueryMap = function (){
 		var $container = stateMap.$container;
-		jqueryMap = {$container : $container};
-	}
+		jqueryMap = {$container : $container,
+		  $acct : $container.find('.spa-shell-head-acct'),
+		  $nav : $container.find('.spa-shell-main-nav')
+		};
+	};
 	// End DOM method /setJqueryMap/
 
 	//Begin DOM method /changeAnchorPart/
@@ -161,6 +168,27 @@ spa.shell = (function () {
 			}			
 			return false;
 	};
+	
+	onTapAcct = function(event) {
+	  var acct_text, user_name, user = spa.model.people.get_user();
+	  if(user.get_is_anon()){
+	    user_name = prompt('Please sign-in');
+	    spa.model.people.login(user_name);
+	    jqueryMap.$acct.text('...processing...');
+	  }
+	  else{
+	    spa.model.people.logout();
+	  }
+	  return false;
+	};
+	
+	onLogin = function(event, login_user){
+	  jqueryMap.$acct.text(login_user.name);
+	};
+	
+	onLogout = function(event, logout_user){
+	  jqueryMap.$acct.text('Please sign-in');
+	};
 	//End event handler /onHashchange/
 	
 	//Begin Event handler /onResize/
@@ -210,6 +238,13 @@ spa.shell = (function () {
 			.bind('resize', onResize)
 			.bind('hashchange', onHashchange)
 			.trigger('hashchange');
+			
+		$.gevent.subscribe($container, 'spa-login', onLogin);
+		$.gevent.subscribe($container, 'spa-logout', onLogout);
+		
+		jqueryMap.$acct
+		  .text( 'Please sign-in')
+		  .bind( 'utap', onTapAcct);
 	};
 	//End Public method /initModule/
 	
