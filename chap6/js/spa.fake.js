@@ -124,7 +124,7 @@ spa.fake = (function () {
           }]);
         }
         else { emit_mock_msg();}
-      });
+      }, 8000);
     };
     
     //Try once per second to use list change callback.
