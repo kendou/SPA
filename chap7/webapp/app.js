@@ -8,6 +8,7 @@
 var
   http = require('http'),
   express = require('express'),
+  routes = require('./routes'),
   logger = require('morgan'),
   bodyParser = require('body-parser'),
   methodOverride = require('method-override'),
@@ -38,9 +39,7 @@ if('production' === app.get('env')){
   app.use(errorHandler());
 }
 
-app.get('/', function(request,response){
-  response.redirect('/spa.html');
-});
+routes.configRoutes(app, server);
 //------------------End Server configuration
 
 //------------------Begin start server
