@@ -11,6 +11,9 @@ $RECYCLE.BIN/
 # idea IDE files
 .idea/
 
+# node_modules, these file will be installed by "npm install"
+node_modules/
+
 # Windows Installer files
 *.cab
 *.msi
