@@ -12,7 +12,7 @@ $RECYCLE.BIN/
 .idea/
 
 # node_modules, these file will be installed by "npm install"
-node_modules/
+node_modules
 
 # Windows Installer files
 *.cab
@@ -47,3 +47,4 @@ node_modules/
 Network Trash Folder
 Temporary Items
 .apdisk
+chap7/webapp/node_modules
