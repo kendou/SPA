@@ -8,7 +8,7 @@
 var
   http = require('http'),
   express = require('express'),
-  routes = require('./routes'),
+  routes = require('./lib/routes'),
   logger = require('morgan'),
   bodyParser = require('body-parser'),
   methodOverride = require('method-override'),
