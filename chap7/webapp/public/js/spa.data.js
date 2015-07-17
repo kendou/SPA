@@ -18,7 +18,7 @@ spa.data = (function () {
     makeSio, getSio, initModule;
 
   makeSio = function(){
-    var socket = io.connect('/chat');
+    var socket = io.connect('http://localhost:3000/chat');
 
     return {
       emit : function(event_name, data) {

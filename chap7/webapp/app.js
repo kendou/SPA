@@ -39,11 +39,12 @@ if('production' === app.get('env')){
   app.use(errorHandler());
 }
 
-routes.configRoutes(app, server);
 //------------------End Server configuration
 
 //------------------Begin start server
 server.listen(3000);
+routes.configRoutes(app, server);
+
 console.log(
   'Express server listenening on port %d in %s mode',
   server.address().port, app.settings.env

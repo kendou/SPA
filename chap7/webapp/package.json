@@ -4,12 +4,12 @@
   "private": true,
   "dependencies" : {
     "express" : "4.13.x",
-    "body-parser" : "*",
-    "method-override" : "*",
-    "morgan" : "*",
-    "errorhandler" : "*",
-    "socket.io" : "*",
-    "mongodb" : "*",
-    "JSV" : "*"
+    "body-parser" : "1.13.x",
+    "method-override" : "2.3.x",
+    "morgan" : "1.6.x",
+    "errorhandler" : "1.4.x",
+    "socket.io" : "1.3.x",
+    "mongodb" : "2.0.x",
+    "JSV" : "4.0.x"
   }
 }

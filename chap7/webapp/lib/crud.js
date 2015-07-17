@@ -81,13 +81,12 @@ constructObj = function(obj_type, obj_map, callback){
         dbHandle.collection(
           obj_type,
           function(outer_error, collection){
-            var options_map = {safe:true},
-              obj_map = request.body;
+            var options_map = {safe:true};
             collection.insert(
               obj_map,
               options_map,
-              function(inner_error, result_map){
-                callback(result_map);
+              function(inner_error, result){
+                callback(result.ops);
               }
             );
           }
